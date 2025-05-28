@@ -59,7 +59,7 @@ document.querySelector(".btn[type='submit']").addEventListener("click", async fu
   };
 
   try {
-    const respuesta = await fetch("https://tu-api.onrender.com/registro", {
+    const respuesta = await fetch("https://panaderia-backend-6rbd.onrender.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datos)
