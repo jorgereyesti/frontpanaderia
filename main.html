@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario - Programa Panadería Social</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f3f3f3; padding: 10px; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-top: 8px solid #3462AC; }
+    h2 { text-align: center; color: #3462AC; }
+    label { display: block; margin-top: 10px; font-weight: bold; color: #3462AC; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
+    .section { margin-top: 10px; border-left: 4px solid #4DA9DF; padding-left: 10px; }
+    .btn { background: #3462AC; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; transition: background 0.3s ease; }
+    .btn:hover { background: #4DA9DF; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #F2DC12; color: #333; }
+    .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fff; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; border-radius: 10px; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .acciones-btns button { margin-right: 5px; background-color: #4DA9DF; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .acciones-btns button:hover { background-color: #3462AC; }
+  </style>
+</head>
+<script>
+document.querySelector(".btn[type='submit']").addEventListener("click", async function (e) {
+  e.preventDefault();
+
+  // Obtener integrantes del grupo familiar
+  const rows = document.querySelectorAll("#tablaIntegrantes tbody tr");
+  const integrantes = Array.from(rows).map(row => {
+    const cells = row.querySelectorAll("td");
+    return {
+      nombre: cells[0].textContent,
+      dni: cells[1].textContent,
+      fecha_nac: cells[2].textContent,
+      escolaridad: cells[3].textContent,
+      vinculo: cells[4].textContent,
+      condicion: cells[5].textContent
+    };
+  });
+
+  // Crear objeto de datos
+  const datos = {
+    fecha_relevamiento: document.querySelector("[name='fecha_relevamiento']").value,
+    cic: document.querySelector("[name='cic']").value,
+    nombre: document.querySelector("[name='nombre']").value,
+    dni: document.querySelector("[name='dni']").value,
+    telefono: document.querySelector("[name='telefono']").value,
+    direccion: document.querySelector("[name='direccion']").value,
+    lena_social: document.querySelector("[name='lena_social']").value,
+    actividades_cic: document.querySelector("[name='actividades_cic']").value,
+    ingresos_formales: document.querySelector("[name='ingresos_formales']").value,
+    huerta: document.querySelector("[name='huerta']").value,
+    mantenimiento_economico: document.querySelector("[name='mantenimiento_economico']").value,
+    observaciones: document.querySelector("[name='observaciones']").value,
+    integrantes: integrantes
+  };
+
+  try {
+    const respuesta = await fetch("https://tu-api.onrender.com/registro", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
+    });
+
+    if (respuesta.ok) {
+      alert("Formulario enviado correctamente.");
+    } else {
+      const error = await respuesta.json();
+      alert("Error al enviar formulario: " + (error.detail || "Error desconocido."));
+    }
+  } catch (error) {
+    alert("No se pudo enviar el formulario: " + error.message);
+  }
+});
+</script>
+
+<body>
+     <div style="text-align:center;">
+    <img src="logo.png" alt="Ciudad San Miguel de Tucumán" style="width:auto ; height: auto;">
+  </div>
+  <div class="container">
+    <h2>Formulario de Registro - Programa Panadería Social</h2>
+    
+    <div class="section">
+      <h3>Datos del Relevamiento</h3>
+      <label>Fecha del relevamiento</label>
+      <input type="date" name="fecha_relevamiento">
+
+      <label>CIC</label>
+      <select name="cic">
+        <option>CIC Oeste II</option>
+        <option>CIC Creadores de Esperanza</option>
+        <option>CIC Vial 3</option>
+        <option>CIC Chañaritos</option>
+        <option>CIC Adolfo de la Vega</option>
+        <option>CIC Parque Sur</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <h3>Datos del Referente Familiar</h3>
+      <label>Nombre y Apellido</label>
+      <input type="text" name="nombre">
+
+      <label>DNI</label>
+      <input type="text" name="dni">
+
+      <label>Teléfono</label>
+      <input type="text" name="telefono">
+
+      <label>Dirección</label>
+      <input type="text" name="direccion">
+    </div>
+
+    <div class="section">
+      <h3>Composición del Grupo Familiar</h3>
+      <button class="btn" type="button" onclick="document.getElementById('modalForm').style.display='block'">Agregar Integrante</button>
+      <table id="tablaIntegrantes">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>DNI</th>
+            <th>Fecha Nac.</th>
+            <th>Escolaridad</th>
+            <th>Vínculo</th>
+            <th>Condición</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <label>¿Retira leña social?</label>
+      <select name="lena_social">
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+
+      <label>¿Participa en actividades del CIC?</label>
+      <select name="actividades_cic">
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+
+      <label>¿Cuenta con ingresos formales?</label>
+      <select name="ingresos_formales">
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+
+      <label>¿Tiene espacio para huerta en su domicilio?</label>
+      <select name="huerta">
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+
+      <label>Mantenimiento Económico</label>
+      <select name="mantenimiento_economico">
+        <option>AUH</option>
+        <option>Pensión / por Discapacidad</option>
+        <option>Pensión madre 7 hijos</option>
+        <option>Jubilación</option>
+        <option>Trabajo Informal</option>
+        <option>Ninguno</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <h3>Observaciones</h3>
+      <textarea name="observaciones" rows="4" placeholder="Situación relevante, derivaciones, etc."></textarea>
+    </div>
+
+    <button class="btn" type="submit">Enviar</button>
+  </div>
+
+  <div id="modalForm" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="document.getElementById('modalForm').style.display='none'">&times;</span>
+      <h3>Agregar Integrante</h3>
+      <label>Nombre y Apellido</label>
+      <input type="text" id="nombre">
+
+      <label>DNI</label>
+      <input type="text" id="dni">
+
+      <label>Fecha de Nacimiento</label>
+      <input type="date" id="fecha">
+
+      <label>¿Cuenta con escolaridad?</label>
+      <select id="escolaridad">
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+
+      <label>Vínculo</label>
+      <select id="vinculo">
+        <option>Esposo/a</option>
+        <option>Hijo/a</option>
+        <option>Abuelo/a</option>
+        <option>Tío/a</option>
+        <option>Sobrino/a</option>
+        <option>Otro</option>
+      </select>
+
+      <label>Condición</label>
+      <select id="condicion">
+        <option>Adulto Mayor</option>
+        <option>Discapacidad</option>
+        <option>Menor de Edad</option>
+        <option>No especifica</option>
+      </select>
+
+      <button class="btn" type="button" onclick="agregarIntegrante()">Guardar Integrante</button>
+    </div>
+  </div>
+
+  </div>
+
+  <script>
+    function agregarIntegrante() {
+      const nombre = document.getElementById('nombre').value;
+      const dni = document.getElementById('dni').value;
+      const fecha = document.getElementById('fecha').value;
+      const escolaridad = document.getElementById('escolaridad').value;
+      const vinculo = document.getElementById('vinculo').value;
+      const condicion = document.getElementById('condicion').value;
+
+      if (nombre && dni && fecha) {
+        const table = document.getElementById('tablaIntegrantes').querySelector('tbody');
+        const row = table.insertRow();
+        row.insertCell(0).textContent = nombre;
+        row.insertCell(1).textContent = dni;
+        row.insertCell(2).textContent = fecha;
+        row.insertCell(3).textContent = escolaridad;
+        row.insertCell(4).textContent = vinculo;
+        row.insertCell(5).textContent = condicion;
+
+        const accionesCell = row.insertCell(6);
+        accionesCell.className = 'acciones-btns';
+        const btnEditar = document.createElement('button');
+        btnEditar.textContent = 'Editar';
+        btnEditar.onclick = () => editarFila(row);
+        const btnEliminar = document.createElement('button');
+        btnEliminar.textContent = 'Eliminar';
+        btnEliminar.onclick = () => row.remove();
+        accionesCell.appendChild(btnEditar);
+        accionesCell.appendChild(btnEliminar);
+
+        document.getElementById('modalForm').style.display = 'none';
+        document.querySelectorAll('#modalForm input, #modalForm select').forEach(el => el.value = '');
+      } else {
+        alert('Por favor complete al menos nombre, DNI y fecha de nacimiento.');
+      }
+    }
+
+    function editarFila(row) {
+      const celdas = row.querySelectorAll('td');
+      document.getElementById('nombre').value = celdas[0].textContent;
+      document.getElementById('dni').value = celdas[1].textContent;
+      document.getElementById('fecha').value = celdas[2].textContent;
+      document.getElementById('escolaridad').value = celdas[3].textContent;
+      document.getElementById('vinculo').value = celdas[4].textContent;
+      document.getElementById('condicion').value = celdas[5].textContent;
+      row.remove();
+      document.getElementById('modalForm').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
